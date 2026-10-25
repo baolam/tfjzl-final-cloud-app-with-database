@@ -97,6 +97,9 @@ class Enrollment(models.Model):
     mode = models.CharField(max_length=5, choices=COURSE_MODES, default=AUDIT)
     rating = models.FloatField(default=5.0)
 
+    def __str__(self):
+        return "Enrollment: " + str(self.id) + ", User: " + str(self.user.username) + ", Course: " + str(self.course.name)
+
 
 # <HINT> Create a Question Model with:
     # Used to persist question content for a course
@@ -105,7 +108,9 @@ class Enrollment(models.Model):
     # Has question content
     # Other fields and methods you would like to design
 class Question(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='questions')
+    courses = models.ManyToManyField(Course, blank=True, related_name='course_questions')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
     question_text = models.CharField(max_length=500)
     grade = models.IntegerField(default=50)
 
@@ -147,4 +152,4 @@ class Submission(models.Model):
     choices = models.ManyToManyField(Choice)
 
     def __str__(self):
-        return "Submission for enrollment: " + str(self.enrollment)
+        return "Enrollment: " + str(self.enrollment)
