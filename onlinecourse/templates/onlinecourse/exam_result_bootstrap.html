@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     {% load static %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Exam Result</title>
 </head>
 <body>
 
@@ -35,21 +36,51 @@
     </div>
 </nav>
 
-<div class="container-fluid">
+<div class="container-fluid mt-3">
     {% if grade > 80 %}
     <div class="alert alert-success">
        <!--HINT Display passed info -->
+       <h4><b>Congratulations, {{ user.first_name }}!</b> You have passed the exam and completed the course with a score of {{ grade }}/100.</h4>
     </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
-        </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
-        </div>
+    {% else %}
+    <div class="alert alert-danger">
+        <!--HINT Display failed info -->
+        <h4><b>Failed.</b> Sorry, {{ user.first_name }}! You did not pass the exam. Your score is {{ grade }}/100.</h4>
     </div>
+    <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
+    {% endif %}
+
+    <div class="card-columns-vertical mt-3">
+        <h5 class="mb-3">Exam results</h5>
+        <!--HINT Display exam results-->
+        {% for lesson in course.lesson_set.all %}
+            {% for question in lesson.question_set.all %}
+            <div class="card mt-2">
+                <div class="card-header bg-light">
+                    <h6>{{ question.question_text }}</h6>
+                </div>
+                <div class="card-body">
+                    {% for choice in question.choice_set.all %}
+                    <div class="form-check">
+                        {% if choice.is_correct and choice in submission.choices.all %}
+                        <span class="text-success font-weight-bold">✓ {{ choice.choice_text }} (Correct answer)</span>
+                        {% elif choice.is_correct and choice not in submission.choices.all %}
+                        <span class="text-warning font-weight-bold">⚠ {{ choice.choice_text }} (Correct answer - Not selected)</span>
+                        {% elif not choice.is_correct and choice in submission.choices.all %}
+                        <span class="text-danger font-weight-bold">✗ {{ choice.choice_text }} (Wrong answer)</span>
+                        {% else %}
+                        <span class="text-secondary">{{ choice.choice_text }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <div class="mt-4 mb-4">
+        <a class="btn btn-primary" href="{% url 'onlinecourse:course_details' course.id %}">Back to Course</a>
+    </div>
+</div>
 </body>
 </html>
